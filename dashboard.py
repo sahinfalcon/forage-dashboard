@@ -4,7 +4,8 @@ from flask_cors import CORS
 import psycopg2
 import threading
 import time
-from config import DATABASE_URL
+#from config import DATABASE_URL
+DATABASE_URL = 'postgres://airflow_user_1:oi9G%2BWZ%25JWSUd1kN@analyticaldb-1.cfmnnswnfhpn.eu-west-2.rds.amazonaws.com:5432/analyticaldb'
 
 # initialise dictionaries so they already exist as empty dicts
 submission_count = {"count": 0}
