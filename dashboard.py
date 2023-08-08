@@ -94,7 +94,7 @@ def calculate_eeb(connection_config):
         cursor = connection.cursor()
         # select 'DURECEC', 'BELONG', and count of submissions for each country
         cursor.execute(
-            "SELECT cnt, AVG(durecec), AVG(belong), (COUNT(*)/5) FROM pisa WHERE durecec IS NOT NULL AND belong IS NOT NULL GROUP BY cnt;"
+            "SELECT cnt, AVG(durecec), AVG(belong), (COUNT(*)) FROM pisa WHERE durecec IS NOT NULL AND belong IS NOT NULL GROUP BY cnt;"
         )
         results = cursor.fetchall()
         eeb_data = {"datasets": []}  # store the result
