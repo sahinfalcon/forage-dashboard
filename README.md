@@ -18,6 +18,17 @@ The project has three levels of challenge:
 - **Level 2:** Same as Level 1, but the data should be no more than a minute old.
 - **Level 3:** Same as Level 2, but the data should be up-to-the-second.
 
+## Solution Overview
+
+The solution leverages a Flask web application hosted on a render.com web service. The application connects to a PostgreSQL database using the `psycopg2` library and retrieves data from the PISA 2018 dataset. The main features of the solution include:
+
+- **Submission Count:** Provides the total count of submissions.
+- **Average Learning Hours per Week:** Calculates and displays the average learning hours per week for different countries.
+- **Economic, Social, and Cultural Scores:** Computes and shows the average ESC scores for different countries.
+- **Early Education and Sense of Belonging:** Displays average scores for early education and sense of belonging, along with the number of submissions for each country.
+- **Submissions Over Time:** Presents the number of submissions over different hours in a day.
+
+
 ## Contents
 
 - [Setup Instructions](#setup-instructions)
