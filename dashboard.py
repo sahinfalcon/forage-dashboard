@@ -4,8 +4,7 @@ from flask_cors import CORS
 import psycopg2
 import threading
 import time
-#from config import DATABASE_URL
-DATABASE_URL = 'postgres://airflow_user_1:oi9G%2BWZ%25JWSUd1kN@analyticaldb-1.cfmnnswnfhpn.eu-west-2.rds.amazonaws.com:5432/analyticaldb'
+from config import source_database
 
 # initialise dictionaries so they already exist as empty dicts
 submission_count = {"count": 0}
@@ -24,7 +23,7 @@ CORS(app)
 # returns number of rows
 def count_rows_in_responses(connection_config):
     try:
-        connection = psycopg2.connect(connection_config)
+        connection = psycopg2.connect(**connection_config)
         cursor = connection.cursor()
         # query to count rows in the pisa table
         cursor.execute("SELECT COUNT(*) FROM pisa;")
@@ -41,7 +40,7 @@ def count_rows_in_responses(connection_config):
 # calculates the learning hours per week + links to a country
 def calculate_average_tmins_and_cnt(connection_config):
     try:
-        connection = psycopg2.connect(connection_config)
+        connection = psycopg2.connect(**connection_config)
         cursor = connection.cursor()
         # query to calculate average 'tmins' divided by 60 for each country
         cursor.execute(
@@ -67,7 +66,7 @@ def calculate_average_tmins_and_cnt(connection_config):
 
 def calculate_escs(connection_config):
     try:
-        connection = psycopg2.connect(connection_config)
+        connection = psycopg2.connect(**connection_config)
         cursor = connection.cursor()
         # query to select average 'escs' for each country
         cursor.execute(
@@ -91,7 +90,7 @@ def calculate_escs(connection_config):
 
 def calculate_eeb(connection_config):
     try:
-        connection = psycopg2.connect(connection_config)
+        connection = psycopg2.connect(**connection_config)
         cursor = connection.cursor()
         # select 'DURECEC', 'BELONG', and count of submissions for each country
         cursor.execute(
@@ -122,7 +121,7 @@ def calculate_eeb(connection_config):
 def get_entries_per_hour(source_database):
     try:
         while True:
-            connection = psycopg2.connect(source_database)
+            connection = psycopg2.connect(**source_database)
             cursor = connection.cursor()
             # select number of entries per hour, order chronologically
             query = "SELECT to_char(time_submitted, 'HH24:00') AS hour, COUNT(*) AS entry_count FROM pisa GROUP BY hour ORDER BY hour;"
@@ -143,7 +142,7 @@ def get_entries_per_hour(source_database):
 def fetch_submission_count():
     while True:
         total_count = 0
-        count = count_rows_in_responses(DATABASE_URL)
+        count = count_rows_in_responses(source_database)
         total_count += count
         submission_count["count"] = total_count
         time.sleep(1)  # fetches every 1 (one) second
@@ -151,7 +150,7 @@ def fetch_submission_count():
 
 def fetch_tmins():
     while True:
-        result = calculate_average_tmins_and_cnt(DATABASE_URL)
+        result = calculate_average_tmins_and_cnt(source_database)
         if result:
             tmins["datasets"] = result["datasets"]
         time.sleep(1)  ##fetches every 1 (one) second
@@ -159,7 +158,7 @@ def fetch_tmins():
 
 def fetch_escs():
     while True:
-        result = calculate_escs(DATABASE_URL)
+        result = calculate_escs(source_database)
         if result:
             escs["datasets"] = result["datasets"]
         time.sleep(1)  # fetches every 1 (one) second
@@ -167,7 +166,7 @@ def fetch_escs():
 
 def fetch_eeb():
     while True:
-        result = calculate_eeb(DATABASE_URL)
+        result = calculate_eeb(source_database)
         if result:
             eeb_data["datasets"] = result["datasets"]
         time.sleep(1)  # fetches every 1 (one) second
@@ -175,7 +174,7 @@ def fetch_eeb():
 
 def fetch_sot():
     while True:
-        result = get_entries_per_hour(DATABASE_URL)
+        result = get_entries_per_hour(source_database)
         if result:
             hourly_data["datasets"] = result["datasets"]
         time.sleep(1)  # fetches every 1 (one) second
@@ -290,7 +289,7 @@ def handle_eeb():
 @app.route("/sot", methods=["GET"])
 def handle_sot():
     if request.method == "GET":
-        sot_data = get_entries_per_hour(DATABASE_URL)
+        sot_data = get_entries_per_hour(source_database)
         return jsonify(sot_data)
 
 
