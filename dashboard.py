@@ -191,7 +191,7 @@ def handle_tmins():
                 "datasets": [
                     country_data
                     for country_data in tmins["datasets"]
-                    if country_data["id"] in countries
+                    if country_data["country"] in countries
                 ]
             }
         else:
