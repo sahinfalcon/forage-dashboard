@@ -2,8 +2,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import psycopg2
-import threading
-import time
 from config import source_database
 
 # initialise dictionaries so they already exist as empty dicts
@@ -118,21 +116,20 @@ def calculate_eeb(connection_config):
         return None
 
 
-def get_entries_per_hour(source_database):
+def get_entries_per_hour(connection_config):
     try:
-        while True:
-            connection = psycopg2.connect(**source_database)
-            cursor = connection.cursor()
-            # select number of entries per hour, order chronologically
-            query = "SELECT to_char(time_submitted, 'HH24:00') AS hour, COUNT(*) AS entry_count FROM pisa GROUP BY hour ORDER BY hour;"
-            cursor.execute(query)
-            results = cursor.fetchall()
-            cursor.close()
-            connection.close()
-            # format data
-            data = [{"x": entry[0], "y": entry[1]} for entry in results]
-            output = {"datasets": [{"id": "Submissions", "data": data}]}
-            return output
+        connection = psycopg2.connect(**connection_config)
+        cursor = connection.cursor()
+        # select number of entries per hour, order chronologically
+        query = "SELECT to_char(time_submitted, 'HH24:00') AS hour, COUNT(*) AS entry_count FROM pisa GROUP BY hour ORDER BY hour;"
+        cursor.execute(query)
+        results = cursor.fetchall()
+        cursor.close()
+        connection.close()
+        # format data
+        data = [{"x": entry[0], "y": entry[1]} for entry in results]
+        output = {"datasets": [{"id": "Submissions", "data": data}]}
+        return output
     except (psycopg2.Error, Exception) as e:
         print(f"Error occurred while connecting to the database: {e}")
         return {"datasets": []}
@@ -140,70 +137,32 @@ def get_entries_per_hour(source_database):
 
 # refreshes once per second to allow for uptothesecond recording
 def fetch_submission_count():
-    while True:
-        total_count = 0
-        count = count_rows_in_responses(source_database)
-        total_count += count
-        submission_count["count"] = total_count
-        time.sleep(1)  # fetches every 1 (one) second
+    count = count_rows_in_responses(source_database)
+    submission_count["count"] = count
 
 
 def fetch_tmins():
-    while True:
-        result = calculate_average_tmins_and_cnt(source_database)
-        if result:
-            tmins["datasets"] = result["datasets"]
-        time.sleep(1)  ##fetches every 1 (one) second
+    result = calculate_average_tmins_and_cnt(source_database)
+    if result:
+        tmins["datasets"] = result["datasets"]
 
 
 def fetch_escs():
-    while True:
-        result = calculate_escs(source_database)
-        if result:
-            escs["datasets"] = result["datasets"]
-        time.sleep(1)  # fetches every 1 (one) second
+    result = calculate_escs(source_database)
+    if result:
+        escs["datasets"] = result["datasets"]
 
 
 def fetch_eeb():
-    while True:
-        result = calculate_eeb(source_database)
-        if result:
-            eeb_data["datasets"] = result["datasets"]
-        time.sleep(1)  # fetches every 1 (one) second
+    result = calculate_eeb(source_database)
+    if result:
+        eeb_data["datasets"] = result["datasets"]
 
 
 def fetch_sot():
-    while True:
-        result = get_entries_per_hour(source_database)
-        if result:
-            hourly_data["datasets"] = result["datasets"]
-        time.sleep(1)  # fetches every 1 (one) second
-
-
-# thread to fetch count in bg
-submissions_thread = threading.Thread(target=fetch_submission_count)
-submissions_thread.daemon = True
-submissions_thread.start()
-
-# thread to fetch tmins in bg
-tmins_thread = threading.Thread(target=fetch_tmins)
-tmins_thread.daemon = True
-tmins_thread.start()
-
-# thread to fetch escs in bg
-escs_thread = threading.Thread(target=fetch_escs)
-escs_thread.daemon = True
-escs_thread.start()
-
-# thread to fetch eeb in bg
-eeb_thread = threading.Thread(target=fetch_eeb)
-eeb_thread.daemon = True
-eeb_thread.start()
-
-# thread to fetch submissions over time in bg
-sot_thread = threading.Thread(target=fetch_sot)
-sot_thread.daemon = True
-sot_thread.start()
+    result = get_entries_per_hour(source_database)
+    if result:
+        hourly_data["datasets"] = result["datasets"]
 
 
 # flask app routes
@@ -213,6 +172,7 @@ sot_thread.start()
 @app.route("/submissions", methods=["GET"])
 def handle_submissions():
     if request.method == "GET":
+        fetch_submission_count()
         return jsonify(submission_count)
 
 
@@ -220,7 +180,8 @@ def handle_submissions():
 @app.route("/tmins", methods=["GET"])
 def handle_tmins():
     if request.method == "GET":
-        # select the diff parameters from the 'countres=' part of the get query request
+        fetch_tmins()
+        # select the diff parameters from the 'countries=' part of the get request
         countries_param = request.args.get("countries")
         if countries_param:
             # need to split into 3 lettr country codes to correlate with 'cnt' column
@@ -229,7 +190,7 @@ def handle_tmins():
             filtered_tmins_data = {
                 "datasets": [
                     country_data
-                    for country_data in escs["datasets"]
+                    for country_data in tmins["datasets"]
                     if country_data["id"] in countries
                 ]
             }
@@ -243,7 +204,8 @@ def handle_tmins():
 @app.route("/escs", methods=["GET"])
 def handle_escs():
     if request.method == "GET":
-        # select the diff parameters from the 'countres=' part of the get query request
+        fetch_escs()
+        # select the diff parameters from the 'countries=' part of the get request
         countries_param = request.args.get("countries")
         if countries_param:
             # need to split into 3 lettr country codes to correlate with 'cnt' column
@@ -266,7 +228,8 @@ def handle_escs():
 @app.route("/eeb", methods=["GET"])
 def handle_eeb():
     if request.method == "GET":
-        # select the diff parameters from the 'countres=' part of the get query request
+        fetch_eeb()
+        # select the diff parameters from the 'countries=' part of the get request
         countries_param = request.args.get("countries")
         if countries_param:
             # need to split into 3 lettr country codes to correlate with 'cnt' column
@@ -289,8 +252,8 @@ def handle_eeb():
 @app.route("/sot", methods=["GET"])
 def handle_sot():
     if request.method == "GET":
-        sot_data = get_entries_per_hour(source_database)
-        return jsonify(sot_data)
+        fetch_sot()
+        return jsonify(hourly_data)
 
 
 if __name__ == "__main__":
