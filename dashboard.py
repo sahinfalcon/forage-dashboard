@@ -2,7 +2,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import psycopg2
-from config import source_database
+from config import DATABASE_URL
 
 # initialise dictionaries so they already exist as empty dicts
 submission_count = {"count": 0}
@@ -21,7 +21,7 @@ CORS(app)
 # returns number of rows
 def count_rows_in_responses(connection_config):
     try:
-        connection = psycopg2.connect(**connection_config)
+        connection = psycopg2.connect(connection_config)
         cursor = connection.cursor()
         # query to count rows in the pisa table
         cursor.execute("SELECT COUNT(*) FROM pisa;")
@@ -38,7 +38,7 @@ def count_rows_in_responses(connection_config):
 # calculates the learning hours per week + links to a country
 def calculate_average_tmins_and_cnt(connection_config):
     try:
-        connection = psycopg2.connect(**connection_config)
+        connection = psycopg2.connect(connection_config)
         cursor = connection.cursor()
         # query to calculate average 'tmins' divided by 60 for each country
         cursor.execute(
@@ -64,7 +64,7 @@ def calculate_average_tmins_and_cnt(connection_config):
 
 def calculate_escs(connection_config):
     try:
-        connection = psycopg2.connect(**connection_config)
+        connection = psycopg2.connect(connection_config)
         cursor = connection.cursor()
         # query to select average 'escs' for each country
         cursor.execute(
@@ -88,7 +88,7 @@ def calculate_escs(connection_config):
 
 def calculate_eeb(connection_config):
     try:
-        connection = psycopg2.connect(**connection_config)
+        connection = psycopg2.connect(connection_config)
         cursor = connection.cursor()
         # select 'DURECEC', 'BELONG', and count of submissions for each country
         cursor.execute(
@@ -118,7 +118,7 @@ def calculate_eeb(connection_config):
 
 def get_entries_per_hour(connection_config):
     try:
-        connection = psycopg2.connect(**connection_config)
+        connection = psycopg2.connect(connection_config)
         cursor = connection.cursor()
         # select number of entries per hour, order chronologically
         query = "SELECT to_char(time_submitted, 'HH24:00') AS hour, COUNT(*) AS entry_count FROM pisa GROUP BY hour ORDER BY hour;"
@@ -137,30 +137,30 @@ def get_entries_per_hour(connection_config):
 
 # refreshes once per second to allow for uptothesecond recording
 def fetch_submission_count():
-    count = count_rows_in_responses(source_database)
+    count = count_rows_in_responses(DATABASE_URL)
     submission_count["count"] = count
 
 
 def fetch_tmins():
-    result = calculate_average_tmins_and_cnt(source_database)
+    result = calculate_average_tmins_and_cnt(DATABASE_URL)
     if result:
         tmins["datasets"] = result["datasets"]
 
 
 def fetch_escs():
-    result = calculate_escs(source_database)
+    result = calculate_escs(DATABASE_URL)
     if result:
         escs["datasets"] = result["datasets"]
 
 
 def fetch_eeb():
-    result = calculate_eeb(source_database)
+    result = calculate_eeb(DATABASE_URL)
     if result:
         eeb_data["datasets"] = result["datasets"]
 
 
 def fetch_sot():
-    result = get_entries_per_hour(source_database)
+    result = get_entries_per_hour(DATABASE_URL)
     if result:
         hourly_data["datasets"] = result["datasets"]
 
