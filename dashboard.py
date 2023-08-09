@@ -122,7 +122,7 @@ def get_entries_per_hour(connection_config):
         connection = psycopg2.connect(connection_config)
         cursor = connection.cursor()
         # Query to select the hour timestamp and count of submissions for each hour
-        cursor.execute("SELECT DATE_TRUNC('hour', timestamp) as x, COUNT(*) as y FROM pisa GROUP BY x;")
+        cursor.execute("SELECT DATE_TRUNC('hour', time_submitted) as x, COUNT(*) as y FROM pisa GROUP BY x;")
         results = cursor.fetchall()
         # Create a defaultdict to store the data
         minute_wise_data = defaultdict(int)
