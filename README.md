@@ -1,14 +1,14 @@
 # Data Engineering Final Project
 
-Welcome to the Forage Dashboard repository! This project is a part of the Data Engineering Makers specialist track and aims to create a real-time dashboard for Global Education Insights (GEI) to visualize and interpret data from the PISA 2018 dataset.
+Welcome to the Forage Dashboard repository! This project is a part of the Data Engineering Makers specialist track and aims to create a real-time dashboard for Global Education Insights (GEI) to visualise and interpret data from the PISA 2018 dataset.
 
 ## About Global Education Insights (GEI)
 
-Global Education Insights (GEI) is a non-profit organization dedicated to improving education systems worldwide. They work with governments, educational institutions, and stakeholders to provide data-driven insights and recommendations for educational policy and practice.
+Global Education Insights (GEI) is a non-profit organisation dedicated to improving education systems worldwide. They work with governments, educational institutions, and stakeholders to provide data-driven insights and recommendations for educational policy and practice.
 
 ## Project Overview
 
-The goal of this project is to leverage data engineering skills to analyze the PISA 2018 dataset and develop a functioning dashboard that GEI can use to easily visualize and interpret the data. The project is carried out in a distributed environment in the Cloud to allow for efficient data processing and collaboration.
+The goal of this project is to leverage data engineering skills to analyse the PISA 2018 dataset and develop a functioning dashboard that GEI can use to easily visualise and interpret the data. The project is carried out in a distributed environment in the Cloud to allow for efficient data processing and collaboration.
 
 ## Project Objectives
 
@@ -38,7 +38,7 @@ The Forage Dashboard solution is not only feature-rich but also deeply automated
 
 #### Deployment and Hosting:
 - Render: Hosts the Flask application and provides a web server environment.
-- Amazon EC2 with tmux: Utilized to run Airflow DAGs persistently.
+- Amazon EC2 with tmux: Utilised to run Airflow DAGs persistently.
 
 #### Version Control and Collaboration:
 - Git/GitHub: Used for version control, collaborative working, and tracking changes.
@@ -61,7 +61,7 @@ The Forage Dashboard remains accessible and available. By hosting the Flask appl
 
 ### Empowering Data-Driven Decisions
 
-The deeply automated and persistent nature of the Forage Dashboard empowers GEI to make data-driven decisions without interruption. The Airflow DAGs ensure that the dataset is perpetually refreshed, enabling the visualization of real-time trends and patterns. Render.com guarantees that the dashboard is always accessible, whether on a desktop or mobile device, enhancing the user experience and fostering effective decision-making.
+The deeply automated and persistent nature of the Forage Dashboard empowers GEI to make data-driven decisions without interruption. The Airflow DAGs ensure that the dataset is perpetually refreshed, enabling the visualisation of real-time trends and patterns. Render.com guarantees that the dashboard is always accessible, whether on a desktop or mobile device, enhancing the user experience and fostering effective decision-making.
 
 By combining Apache Airflow's automation capabilities with render.com's continuous deployment, the Forage Dashboard remains an innovative solution that bridges data science and accessibility for informed education policy and practice improvements.
 
