@@ -3,6 +3,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import psycopg2
 from config import DATABASE_URL
+from collections import defaultdict 
 
 # initialise dictionaries so they already exist as empty dicts
 submission_count = {"count": 0}
@@ -120,19 +121,28 @@ def get_entries_per_hour(connection_config):
     try:
         connection = psycopg2.connect(connection_config)
         cursor = connection.cursor()
-        # select number of entries per hour, order chronologically
-        query = "SELECT to_char(time_submitted, 'HH24:00') AS hour, COUNT(*) AS entry_count FROM pisa GROUP BY hour ORDER BY hour;"
-        cursor.execute(query)
+        #select hour  count of submissions for each hour
+        cursor.execute("SELECT DATE_TRUNC('hour', timestamp) as x, COUNT(*) as y FROM pisa GROUP BY x;")
         results = cursor.fetchall()
+        #defaultdict 2 store data
+        minute_wise_data = defaultdict(int)
+        #populate what i just created
+        for timestamp, count in results:
+            formatted_timestamp = timestamp.strftime("%H:%M")
+            minute_wise_data[formatted_timestamp] = count
         cursor.close()
         connection.close()
-        # format data
-        data = [{"x": entry[0], "y": entry[1]} for entry in results]
-        output = {"datasets": [{"id": "Submissions", "data": data}]}
-        return output
+        #chronological order :D
+        sorted_data = sorted(minute_wise_data.items(), key=lambda item: item[0])
+        #format 
+        dataset = {
+            "id": "Submissions",
+            "data": [{"x": timestamp, "y": count} for timestamp, count in sorted_data]
+        }
+        return {"datasets": [dataset]}
     except (psycopg2.Error, Exception) as e:
         print(f"Error occurred while connecting to the database: {e}")
-        return {"datasets": []}
+        return {"datasets": []} 
 
 
 # refreshes once per second to allow for uptothesecond recording
@@ -165,7 +175,25 @@ def fetch_sot():
         hourly_data["datasets"] = result["datasets"]
 
 
-# flask app routes
+# function to configure dashboard menu which filters graph by country
+def filter_by_country_menu(metric):
+    # select the diff parameters from the 'countries' part of the get query request
+    countries_param = request.args.get("countries")
+    if countries_param:
+        # need to split into 3 letter country codes to correlate with 'cnt' column
+        countries = countries_param.split(",")
+        # filter the data based on what countries were in the query
+        filtered_data = {
+            "datasets": [
+                country_data
+                for country_data in metric["datasets"]
+                if country_data["country" if metric == tmins else "id"] in countries
+            ]
+        }
+    else:
+        # get all if no specific country is selected
+        filtered_data = metric
+    return filtered_data
 
 
 # total submission count route
@@ -181,22 +209,7 @@ def handle_submissions():
 def handle_tmins():
     if request.method == "GET":
         fetch_tmins()
-        # select the diff parameters from the 'countries=' part of the get request
-        countries_param = request.args.get("countries")
-        if countries_param:
-            # need to split into 3 lettr country codes to correlate with 'cnt' column
-            countries = countries_param.split(",")
-            # filter the data based on what countries were in the query
-            filtered_tmins_data = {
-                "datasets": [
-                    country_data
-                    for country_data in tmins["datasets"]
-                    if country_data["country"] in countries
-                ]
-            }
-        else:
-            # get all if no specific country is selected
-            filtered_tmins_data = tmins
+        filtered_tmins_data = filter_by_country_menu(tmins)
         return jsonify(filtered_tmins_data)
 
 
@@ -205,22 +218,7 @@ def handle_tmins():
 def handle_escs():
     if request.method == "GET":
         fetch_escs()
-        # select the diff parameters from the 'countries=' part of the get request
-        countries_param = request.args.get("countries")
-        if countries_param:
-            # need to split into 3 lettr country codes to correlate with 'cnt' column
-            countries = countries_param.split(",")
-            # filter the data based on what countries were in the query
-            filtered_escs_data = {
-                "datasets": [
-                    country_data
-                    for country_data in escs["datasets"]
-                    if country_data["id"] in countries
-                ]
-            }
-        else:
-            # get all if no specific country is selected
-            filtered_escs_data = escs
+        filtered_escs_data = filter_by_country_menu(escs)
         return jsonify(filtered_escs_data)
 
 
@@ -229,22 +227,7 @@ def handle_escs():
 def handle_eeb():
     if request.method == "GET":
         fetch_eeb()
-        # select the diff parameters from the 'countries=' part of the get request
-        countries_param = request.args.get("countries")
-        if countries_param:
-            # need to split into 3 lettr country codes to correlate with 'cnt' column
-            countries = countries_param.split(",")
-            # filter the data based on what countries were in the query
-            filtered_eeb_data = {
-                "datasets": [
-                    country_data
-                    for country_data in eeb_data["datasets"]
-                    if country_data["id"] in countries
-                ]
-            }
-        else:
-            # get all if no specific country is selected
-            filtered_eeb_data = eeb_data
+        filtered_eeb_data = filter_by_country_menu(eeb_data)
         return jsonify(filtered_eeb_data)
 
 
