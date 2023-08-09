@@ -2,6 +2,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import psycopg2
+from datetime import datetime, timedelta
 from config import DATABASE_URL
 
 # Create flask app
@@ -112,9 +113,12 @@ def get_entries_per_hour(connection_config):
     try:
         connection = psycopg2.connect(connection_config)
         cursor = connection.cursor()
-        # Select number of entries per hour, order chronologically
+        # Calculate the start time (24 hours ago from now)
+        start_time = datetime.now() - timedelta(hours=24)
+        # Select number of entries per hour within the last 24 hours, order chronologically
         cursor.execute(
-            "SELECT to_char(time_submitted, 'HH24:00') AS hour, COUNT(*) AS entry_count FROM pisa GROUP BY hour ORDER BY hour;"
+            "SELECT to_char(time_submitted, 'HH24:00') AS hour, COUNT(*) AS entry_count FROM pisa WHERE time_submitted >= %s GROUP BY hour ORDER BY hour;",
+            (start_time,)
         )
         results = cursor.fetchall()
         cursor.close()
@@ -124,7 +128,7 @@ def get_entries_per_hour(connection_config):
         output = {"datasets": [{"id": "Submissions", "data": data}]}
         return output
     except (psycopg2.Error, Exception) as e:
-        # So I know why it's throwning an error
+        # So I know why it's throwing an error
         print(f"Error occurred while connecting to the database: {e}")
         return None
 
