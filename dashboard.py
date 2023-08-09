@@ -97,8 +97,8 @@ def calculate_eeb(connection_config):
         results = cursor.fetchall()
         eeb_data = {"datasets": []}  # store the result
         for country, durecec, belong, submissions in results:
-            # convert 'durecec' to int
-            durecec = int(durecec) if durecec is not None else None
+            # convert 'durecec' to float
+            durecec = round(float(durecec), 1) if durecec is not None else None
             # convert 'belong' to float and round to 1 decimal place
             belong = round(float(belong), 1) if belong is not None else None
             # add country data to eeb datasets
