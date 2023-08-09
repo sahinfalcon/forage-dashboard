@@ -22,6 +22,27 @@ The project has three levels of challenge:
 
 The Forage Dashboard solution is not only feature-rich but also deeply automated and persistent, making it an indispensable tool for Global Education Insights (GEI) to derive data-driven insights in real-time. Let's delve into the details of how this solution remains current and always accessible:
 
+### Stack
+
+#### Backend:
+- Python
+- Flask: Web framework to build RESTful APIs for data retrieval and serve the frontend.
+- Psycopg2: Connects and interacts with the PostgreSQL database.
+
+#### Database:
+- Amazon RDS: Cloud-based relational database to store and manage the PISA 2018 dataset.
+- PostgreSQL: Database management system used within the Amazon RDS.
+
+#### Data Ingestion and Processing:
+- Apache Airflow: Orchestrates the data ingestion process. Airflow DAGs periodically collect data from 20 different source Amazon RDS databases and populate the main analytical RDS.
+
+#### Deployment and Hosting:
+- Render: Hosts the Flask application and provides a web server environment.
+- Amazon EC2 with tmux: Utilized to run Airflow DAGs persistently.
+
+#### Version Control and Collaboration:
+- Git/GitHub: Used for version control, collaborative working, and tracking changes.
+
 ### Automated Data Collection and Integration
 
 The foundation of this solution is built upon 20 Apache Airflow DAGs that execute continuously and autonomously. These DAGs orchestrate the collection and integration of data from 20 distinct AWS RDS sources. This process ensures that the central AWS RDS, which the Forage Dashboard relies upon, is continuously updated with the latest information every 30 seconds. By pooling data from these distributed sources, the dashboard guarantees a comprehensive and up-to-date perspective.
