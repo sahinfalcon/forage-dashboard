@@ -37,8 +37,8 @@ The Forage Dashboard solution is not only feature-rich but also deeply automated
 - Apache Airflow: Orchestrates the data ingestion process. Airflow DAGs periodically collect data from 20 different source Amazon RDS databases and populate the main analytical RDS.
 
 #### Deployment and Hosting:
-- Render: Hosts the Flask application and provides a web server environment.
-- Amazon EC2 with tmux: Utilised to run Airflow DAGs persistently.
+- Render: Provides a web server environment with pollable api endpoints.
+- Amazon EC2 with tmux: Utilised to run Airflow DAGs and the Flask app persistently.
 
 #### Version Control and Collaboration:
 - Git/GitHub: Used for version control, collaborative working, and tracking changes.
