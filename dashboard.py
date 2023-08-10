@@ -24,7 +24,7 @@ def count_rows_in_responses(connection_config):
         connection.close()
         return {"count": count}
     except (psycopg2.Error, Exception) as e:
-        # So I know why it's throwning an error
+        # So I know why it's throwing an error
         print(f"Error occurred while connecting to the database: {e}")
         return None
 
@@ -49,7 +49,7 @@ def calculate_average_tmins_by_country(connection_config):
         connection.close()
         return output
     except (psycopg2.Error, Exception) as e:
-        # So I know why it's throwning an error
+        # So I know why it's throwing an error
         print(f"Error occurred while connecting to the database: {e}")
         return None
 
@@ -73,7 +73,7 @@ def calculate_escs(connection_config):
         connection.close()
         return output  # Return result directly
     except (psycopg2.Error, Exception) as e:
-        # So I know why it's throwning an error
+        # So I know why it's throwing an error
         print(f"Error occurred while connecting to the database: {e}")
         return None
 
@@ -104,7 +104,7 @@ def calculate_eeb(connection_config):
         connection.close()
         return output  # Return result directly
     except (psycopg2.Error, Exception) as e:
-        # So I know why it's throwning an error
+        # So I know why it's throwing an error
         print(f"Error occurred while connecting to the database: {e}")
         return None
 
