@@ -91,8 +91,8 @@ def calculate_eeb(connection_config):
         for country, durecec, belong, submissions in results:
             # Convert 'durecec' to float and round to 2 decimal places
             durecec = round(float(durecec), 2)
-            # Convert 'belong' to float and round to 4 decimal places
-            belong = round(float(belong), 4)
+            # Convert 'belong' to float and round to 2 decimal places
+            belong = round(float(belong), 2)
             # Add country data to eeb datasets
             output["datasets"].append(
                 {
