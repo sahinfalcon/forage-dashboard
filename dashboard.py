@@ -36,7 +36,7 @@ def calculate_average_tmins_by_country(connection_config):
         cursor = connection.cursor()
         # Query to calculate average 'tmins' divided by 60 for each country
         cursor.execute(
-            "SELECT cnt, AVG(tmins/60) FROM pisa WHERE tmins IS NOT NULL GROUP BY cnt ORDER BY tmins;"
+            "SELECT cnt, AVG(tmins/60) FROM pisa WHERE tmins IS NOT NULL GROUP BY cnt ORDER BY AVG(tmins/60) DESC;"
         )
         results = cursor.fetchall()
         output = {"datasets": []}  # to store the output
