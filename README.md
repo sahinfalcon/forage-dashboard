@@ -98,7 +98,7 @@ By combining Apache Airflow's automation capabilities with render.com's continuo
 The project directory has the following structure:
 
 - `.gitignore`: Specifies files and directories ignored by Git.
-- `Procfile`: Used by Heroku to specify commands for deploying.
+- `pisa_etl_dag.py`: Apache Airflow DAG script to Extract, Transform and Load the PISA data.
 - `config.py`: Configuration file for storing environment variables.
 - `dashboard.py`: Main script for generating endpoint APIs for the dashboard.
 - `requirements.txt`: List of project dependencies.
